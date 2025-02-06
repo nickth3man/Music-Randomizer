@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Random MP3 + MP4 Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="script.js" as="script">
+    <link rel="dns-prefetch" href="../media">
+</head>
+<body>
+    <div id="link-container">
+        <a id="clickLink" href="#" aria-label="Play random media">Click Here</a>
+    </div>
+
+    <video 
+        id="videoPlayer"
+        muted
+        loop
+        playsinline
+        preload="auto"
+        aria-hidden="true"
+        crossorigin="anonymous"
+        onerror="this.style.display='none'"
+    ></video>
+
+    <audio 
+        id="audioPlayer" 
+        preload="auto"
+        loop
+        crossorigin="anonymous"
+        onerror="console.error('Audio failed to load')"
+    ></audio>
+
+    <noscript>
+        <p>JavaScript is required to run this application.</p>
+    </noscript>
+
+    <script src="script.js"></script>
+</body>
+</html>

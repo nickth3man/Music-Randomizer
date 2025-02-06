@@ -1,0 +1,95 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #000;
+}
+
+#link-container {
+    position: fixed;
+    top: 20px;
+    z-index: 1000;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    transition: opacity 0.3s ease;
+}
+
+#clickLink {
+    display: inline-block;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    text-decoration: none;
+    font-family: sans-serif;
+    font-size: 24px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+#clickLink:hover {
+    background: rgba(0, 0, 0, 0.7);
+    transform: scale(1.05);
+}
+
+#videoPlayer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -o-object-fit: cover;
+    z-index: -1;
+    display: none;
+    background: #000;
+    opacity: 0;
+    transition: opacity ${FADE_DURATION}ms ease-in-out;
+    will-change: opacity;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+#audioPlayer {
+    display: none;
+}
+
+body.loading {
+    cursor: wait;
+}
+
+body.loading #clickLink {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+body.loading #link-container {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+@media (max-width: 768px) {
+    #clickLink {
+        font-size: 20px;
+        padding: 8px 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #videoPlayer,
+    #clickLink {
+        transition: none;
+    }
+}

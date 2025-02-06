@@ -1,0 +1,13 @@
+Music Site/
+├── Content/
+│   ├── index.html
+│   ├── styles.css
+│   └── script.js
+├── media/
+│   ├── audio/
+│   │   ├── audio1.mp3
+│   │   └── audio2.mp3
+│   └── video/
+│       ├── video1.mp4
+│       └── video2.mp4
+└── directory_structure.txt
