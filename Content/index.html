@@ -8,9 +8,10 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preload" href="styles.css" as="style">
     <link rel="preload" href="script.js" as="script">
-    <link rel="dns-prefetch" href="../media">
-    <meta name="theme-color" content="#000000">
+    <link rel="dns-prefetch" href="media">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="icon" href="data:,">
 </head>
 <body>
     <div id="link-container">
@@ -22,18 +23,24 @@
         <div>Tap anywhere to continue if playback doesn't start automatically</div>
     </div>
     
+    <div class="media-error">
+        <p>Playback failed. Check console for details.</p>
+        <button type="button" onclick="location.reload()">Retry</button>
+    </div>
+    
     <video 
         id="videoPlayer"
         muted
         loop
         playsinline
-        webkit-playsinline
         preload="auto"
-        aria-hidden="true"
         crossorigin="anonymous"
         onerror="this.style.display='none'"
         oncanplaythrough="this.style.opacity='1'"
-    ></video>
+        onloadeddata="console.log('Video loaded:', this.src)"
+    >
+        Your browser does not support the video element.
+    </video>
 
     <audio 
         id="audioPlayer" 
@@ -42,6 +49,7 @@
         crossorigin="anonymous"
         onerror="console.error('Audio failed to load')"
         oncanplaythrough="this.parentElement.classList.remove('loading')"
+        onloadeddata="console.log('Audio loaded:', this.src)"
     ></audio>
 
     <noscript>

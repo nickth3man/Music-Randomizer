@@ -1,0 +1,23 @@
+{
+    "name": "random-media-player",
+    "version": "1.0.0",
+    "description": "Random media player website",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "main": "server.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/nickth3man/Music-Randomizer.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/nickth3man/Music-Randomizer/issues"
+    },
+    "homepage": "https://github.com/nickth3man/Music-Randomizer#readme",
+    "dependencies": {
+        "express": "^4.21.2"
+    }
+}
