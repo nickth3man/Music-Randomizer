@@ -1,0 +1,16 @@
+
+# Media folder
+media/
+media/**/*
+
+# Media files
+*.mp3
+*.mp4
+*.wav
+*.ogg
+*.webm
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini

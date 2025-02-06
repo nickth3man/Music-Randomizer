@@ -1,3 +1,7 @@
+:root {
+    --fade-duration: 300ms;
+}
+
 html, body {
     margin: 0;
     padding: 0;
@@ -56,7 +60,7 @@ body {
     display: none;
     background: #000;
     opacity: 0;
-    transition: opacity ${FADE_DURATION}ms ease-in-out;
+    transition: opacity var(--fade-duration) ease-in-out;
     will-change: opacity;
     backface-visibility: hidden;
     transform: translateZ(0);
@@ -80,6 +84,24 @@ body.loading #link-container {
     pointer-events: none;
 }
 
+.media-loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    display: none;
+    text-align: center;
+    padding: 1em;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+body.loading .media-loading {
+    display: block;
+}
+
 @media (max-width: 768px) {
     #clickLink {
         font-size: 20px;
@@ -87,9 +109,21 @@ body.loading #link-container {
     }
 }
 
+@media (hover: none) {
+    #clickLink:hover {
+        transform: none;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     #videoPlayer,
     #clickLink {
         transition: none;
+    }
+}
+
+@supports not (backdrop-filter: blur(5px)) {
+    .media-loading {
+        background: rgba(0, 0, 0, 0.8);
     }
 }

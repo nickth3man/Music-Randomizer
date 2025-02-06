@@ -29,8 +29,21 @@ const FADE_DURATION = 300;
 let mediaCache = new Map();
 let isPreloading = false;
 
+const MEDIA_TIMEOUT = 10000; // 10 seconds timeout for media loading
+const mediaLoadTimers = new Map();
+
+const VOLUME_FADE_DURATION = 200;
+const MIN_LOAD_TIME = 100;
+
 function getRandomMedia(array) {
     return array[Math.floor(Math.random() * array.length)];
+}
+
+function clearMediaLoadTimer(url) {
+    if (mediaLoadTimers.has(url)) {
+        clearTimeout(mediaLoadTimers.get(url));
+        mediaLoadTimers.delete(url);
+    }
 }
 
 function preloadMedia(url) {
@@ -38,14 +51,28 @@ function preloadMedia(url) {
     
     return new Promise((resolve, reject) => {
         const elem = url.endsWith('mp4') ? document.createElement('video') : document.createElement('audio');
-        elem.src = url;
-        elem.preload = 'auto';
+        
+        const timeoutId = setTimeout(() => {
+            elem.remove();
+            reject(new Error('Media load timeout'));
+        }, MEDIA_TIMEOUT);
+        
+        mediaLoadTimers.set(url, timeoutId);
         
         elem.onloadeddata = () => {
+            clearMediaLoadTimer(url);
             mediaCache.set(url, url);
             resolve(url);
         };
-        elem.onerror = reject;
+        
+        elem.onerror = () => {
+            clearMediaLoadTimer(url);
+            elem.remove();
+            reject(new Error('Media load failed'));
+        };
+        
+        elem.src = url;
+        elem.preload = 'auto';
     });
 }
 
@@ -89,6 +116,27 @@ async function startRandomPlayback() {
     }
 }
 
+function fadeVolume(element, targetVolume, duration) {
+    const startVolume = element.volume;
+    const startTime = performance.now();
+    
+    return new Promise(resolve => {
+        function updateVolume() {
+            const elapsed = performance.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            element.volume = startVolume + (targetVolume - startVolume) * progress;
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateVolume);
+            } else {
+                resolve();
+            }
+        }
+        requestAnimationFrame(updateVolume);
+    });
+}
+
 async function changeMedia() {
     if (!playbackStarted) {
         clickLink.parentElement.style.display = 'none';
@@ -107,26 +155,51 @@ async function changeMedia() {
         const randomVideo = getRandomMedia(videos);
         const randomAudio = getRandomMedia(audios);
         
+        // Cancel any ongoing media operations
+        if (currentVideo) clearMediaLoadTimer(currentVideo);
+        if (currentAudio) clearMediaLoadTimer(currentAudio);
+        
+        // Reset media state
+        videoPlayer.style.display = 'block';
+        videoPlayer.style.opacity = '0';
+        await fadeVolume(audioPlayer, 0, VOLUME_FADE_DURATION);
+        
+        // Ensure minimum loading time for UI feedback
+        await Promise.all([
+            new Promise(resolve => setTimeout(resolve, MIN_LOAD_TIME)),
+            preloadMedia(randomVideo).catch(() => randomVideo),
+            preloadMedia(randomAudio).catch(() => randomAudio)
+        ]);
+        
         // Set new sources
         videoPlayer.src = randomVideo;
         audioPlayer.src = randomAudio;
-        audioPlayer.volume = DEFAULT_VOLUME;
         
-        // Start playback
-        videoPlayer.style.display = 'block';
-        await Promise.all([
-            videoPlayer.play(),
-            audioPlayer.play()
+        // Start playback with volume fade-in
+        const playPromises = await Promise.all([
+            videoPlayer.play().catch(() => {
+                throw new Error('Video playback failed');
+            }),
+            audioPlayer.play().catch(() => {
+                throw new Error('Audio playback failed');
+            })
         ]);
         
+        await fadeVolume(audioPlayer, DEFAULT_VOLUME, VOLUME_FADE_DURATION);
         videoPlayer.style.opacity = '1';
         currentVideo = randomVideo;
         currentAudio = randomAudio;
         
-        // Preload next media
+        // Clean up old cached media
+        Array.from(mediaCache.keys())
+            .filter(url => url !== currentVideo && url !== currentAudio)
+            .forEach(url => mediaCache.delete(url));
+            
         preloadNextMedia();
     } catch (error) {
-        throw new Error(`Media change failed: ${error.message}`);
+        videoPlayer.style.opacity = '0';
+        await fadeVolume(audioPlayer, 0, VOLUME_FADE_DURATION);
+        throw error;
     }
 }
 
@@ -156,6 +229,9 @@ function handleMediaError(error, type) {
     console.error(`${type} playback error:`, error);
     if (mediaCache.has(currentVideo)) mediaCache.delete(currentVideo);
     if (mediaCache.has(currentAudio)) mediaCache.delete(currentAudio);
+    document.body.classList.remove('loading');
+    videoPlayer.style.opacity = '0';
+    fadeVolume(audioPlayer, 0, VOLUME_FADE_DURATION);
 }
 
 videoPlayer.addEventListener('error', (e) => handleMediaError(e, 'Video'));
@@ -179,4 +255,6 @@ document.addEventListener('visibilitychange', () => {
 
 window.addEventListener('beforeunload', () => {
     mediaCache.clear();
+    mediaLoadTimers.forEach(timerId => clearTimeout(timerId));
+    mediaLoadTimers.clear();
 });

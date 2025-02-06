@@ -9,21 +9,30 @@
     <link rel="preload" href="styles.css" as="style">
     <link rel="preload" href="script.js" as="script">
     <link rel="dns-prefetch" href="../media">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
 </head>
 <body>
     <div id="link-container">
         <a id="clickLink" href="#" aria-label="Play random media">Click Here</a>
     </div>
 
+    <div class="media-loading">
+        <div>Loading media...</div>
+        <div>Tap anywhere to continue if playback doesn't start automatically</div>
+    </div>
+    
     <video 
         id="videoPlayer"
         muted
         loop
         playsinline
+        webkit-playsinline
         preload="auto"
         aria-hidden="true"
         crossorigin="anonymous"
         onerror="this.style.display='none'"
+        oncanplaythrough="this.style.opacity='1'"
     ></video>
 
     <audio 
@@ -32,6 +41,7 @@
         loop
         crossorigin="anonymous"
         onerror="console.error('Audio failed to load')"
+        oncanplaythrough="this.parentElement.classList.remove('loading')"
     ></audio>
 
     <noscript>
